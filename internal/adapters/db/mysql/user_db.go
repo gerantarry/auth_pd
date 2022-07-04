@@ -15,10 +15,10 @@ const (
 )
 
 type Storage interface {
-	Get(ctx context.Context, login string, password string) (*entity.User, error)
+	Get(ctx context.Context, login, password string) (*entity.User, error)
 	Insert(ctx context.Context, user entity.User) error
-	Delete(ctx context.Context, id int, login string)
-	Update(ctx context.Context, id int, login string)
+	Delete(ctx context.Context, id int, login string) error
+	Update(ctx context.Context, id int, login string) error
 }
 
 type userStorage struct {
@@ -30,9 +30,9 @@ func NewUserStorage(db *sql.DB) *userStorage {
 	return &userStorage{storage: *db}
 }
 
-func (s *userStorage) Get(ctx context.Context, login string, password string) (*entity.User, error) {
-	checkPing(s)
-	row := s.storage.QueryRow("select * from pd.person where login = %s", login) //TODO заменить хардкод названия схемы на значение из конфиг файла
+func (s *userStorage) Get(ctx context.Context, login, password string) (*entity.User, error) {
+	checkPing(ctx, s)
+	row := s.storage.QueryRowContext(ctx, "select * from pd.person where login = %s", login) //TODO заменить хардкод названия схемы на значение из конфиг файла
 	user := entity.User{}
 	err := row.Scan(
 		&user.ID,
@@ -55,15 +55,35 @@ func (s *userStorage) Get(ctx context.Context, login string, password string) (*
 }
 
 func (s *userStorage) Insert(ctx context.Context, user entity.User) error {
-	checkPing(s)
-	_, err := s.storage.Exec(
-		"insert pd.person(first_name, second_name, login, password_hash, email) values(%s,%s,%s,%s,%s)",
+	checkPing(ctx, s)
+	_, err := s.storage.ExecContext(
+		ctx,
+		"insert pd.person(first_name, second_name, login, password_hash, email) values(%s,%s,%s,%s,%s)", //TODO заменить хардкод названия схемы на значение из конфиг файла
 		user.FirstName, user.SecondName, user.Login, user.Password, user.Email)
 	return err
 }
 
-func checkPing(s *userStorage) {
-	if err := s.storage.Ping(); err != nil {
+func (s *userStorage) Delete(ctx context.Context, id int, login string) error {
+	checkPing(ctx, s)
+	_, err := s.storage.ExecContext(ctx,
+		"delete from pd.person where id = %d and login = %s",
+		id,
+		login) //TODO заменить хардкод названия схемы на значение из конфиг файла
+	return err
+}
+
+//Update не доделана - необходим способ передачи параметра который собираемся апдейтить
+func (s *userStorage) Update(ctx context.Context, id int, login string) error {
+	checkPing(ctx, s)
+	_, err := s.storage.ExecContext(ctx,
+		"update pd.person",
+		id,
+		login)
+	return err
+}
+
+func checkPing(ctx context.Context, s *userStorage) {
+	if err := s.storage.PingContext(ctx); err != nil {
 		fmt.Println(err.Error())
 	}
 }
