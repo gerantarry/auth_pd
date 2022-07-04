@@ -16,9 +16,9 @@ const (
 
 type Storage interface {
 	Get(ctx context.Context, login string, password string) (*entity.User, error)
-	Insert(ctx context.Context, user entity.User)
-	Delete()
-	Update()
+	Insert(ctx context.Context, user entity.User) error
+	Delete(ctx context.Context, id int, login string)
+	Update(ctx context.Context, id int, login string)
 }
 
 type userStorage struct {
@@ -52,6 +52,14 @@ func (s *userStorage) Get(ctx context.Context, login string, password string) (*
 		return &user, errors.New("wrong password")
 	}
 	return &user, nil
+}
+
+func (s *userStorage) Insert(ctx context.Context, user entity.User) error {
+	checkPing(s)
+	_, err := s.storage.Exec(
+		"insert pd.person(first_name, second_name, login, password_hash, email) values(%s,%s,%s,%s,%s)",
+		user.FirstName, user.SecondName, user.Login, user.Password, user.Email)
+	return err
 }
 
 func checkPing(s *userStorage) {
