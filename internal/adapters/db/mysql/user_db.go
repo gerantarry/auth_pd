@@ -11,7 +11,7 @@ import (
 
 const (
 	mysqlDriver    = "mysql"
-	dataSourceName = "root:!QAZ2wsx#EDC@/schema" //TODO заменить хардкод на значение из конфиг файла
+	dataSourceName = "root:!QAZ2wsx#EDC@tcp(127.0.0.1:6603)/pd" //TODO заменить хардкод на значение из конфиг файла
 )
 
 type Storage interface {
@@ -32,7 +32,7 @@ func NewUserStorage(db *sql.DB) *userStorage {
 
 func (s *userStorage) Get(ctx context.Context, login, password string) (*entity.User, error) {
 	checkPing(ctx, s)
-	row := s.storage.QueryRowContext(ctx, "select * from pd.person where login = %s", login) //TODO заменить хардкод названия схемы на значение из конфиг файла
+	row := s.storage.QueryRowContext(ctx, "select * from pd.person where login = ?", login) //TODO заменить хардкод названия схемы на значение из конфиг файла
 	user := entity.User{}
 	err := row.Scan(
 		&user.ID,
@@ -58,7 +58,7 @@ func (s *userStorage) Insert(ctx context.Context, user entity.User) error {
 	checkPing(ctx, s)
 	_, err := s.storage.ExecContext(
 		ctx,
-		"insert pd.person(first_name, second_name, login, password_hash, email) values(%s,%s,%s,%s,%s)", //TODO заменить хардкод названия схемы на значение из конфиг файла
+		"insert pd.person(first_name, second_name, login, password_hash, email) values(?, ?, ?, ?, ?)", //TODO заменить хардкод названия схемы на значение из конфиг файла
 		user.FirstName, user.SecondName, user.Login, user.Password, user.Email)
 	return err
 }
@@ -66,7 +66,7 @@ func (s *userStorage) Insert(ctx context.Context, user entity.User) error {
 func (s *userStorage) Delete(ctx context.Context, id int, login string) error {
 	checkPing(ctx, s)
 	_, err := s.storage.ExecContext(ctx,
-		"delete from pd.person where id = %d and login = %s",
+		"delete from pd.person where id = ? and login = ?",
 		id,
 		login) //TODO заменить хардкод названия схемы на значение из конфиг файла
 	return err
