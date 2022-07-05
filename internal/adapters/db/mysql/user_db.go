@@ -66,7 +66,7 @@ func (s *userStorage) Insert(ctx context.Context, user entity.User) error {
 func (s *userStorage) Delete(ctx context.Context, id int, login string) error {
 	checkPing(ctx, s)
 	_, err := s.storage.ExecContext(ctx,
-		"delete from pd.person where id = ? and login = ?",
+		"delete from pd.person where person_id = ? and login = ?",
 		id,
 		login) //TODO заменить хардкод названия схемы на значение из конфиг файла
 	return err
