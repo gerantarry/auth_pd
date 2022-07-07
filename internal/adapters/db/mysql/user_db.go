@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"auth_pd/internal/domain/entity"
+	"auth_pd/pkg/logging"
 	"context"
 	"database/sql"
 	"errors"
@@ -23,15 +24,17 @@ type Storage interface {
 
 type userStorage struct {
 	storage sql.DB
+	logger  *logging.Logger
 }
 
 //NewUserStorage - конструктор
-func NewUserStorage(db *sql.DB) *userStorage {
-	return &userStorage{storage: *db}
+func NewUserStorage(db *sql.DB, logger *logging.Logger) *userStorage {
+	return &userStorage{storage: *db, logger: logger}
 }
 
 func (s *userStorage) Get(ctx context.Context, login, password string) (*entity.User, error) {
 	checkPing(ctx, s)
+	s.logger.Infof("Поиск пользователя с login:%s", login)
 	row := s.storage.QueryRowContext(ctx, "select * from pd.person where login = ?", login) //TODO заменить хардкод названия схемы на значение из конфиг файла
 	user := entity.User{}
 	err := row.Scan(
@@ -45,11 +48,18 @@ func (s *userStorage) Get(ctx context.Context, login, password string) (*entity.
 		fmt.Println(err.Error())
 		return &user, err
 	}
+	s.logger.Debugf("Найден пользователь:\n %v", user)
 	switch checkUserPassword(user, password) {
 	case true:
-		return &user, nil
+		{
+			s.logger.Debugf("Проверка пароля пользователя %s . SUCCESS", user.Login)
+			return &user, nil
+		}
 	case false:
-		return &user, errors.New("wrong password")
+		{
+			s.logger.Debugf("Проверка пароля пользователя %s . Неправильно набран пароль %s", user.Login, password)
+			return &user, errors.New("wrong password")
+		}
 	}
 	return &user, nil
 }

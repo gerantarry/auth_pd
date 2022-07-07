@@ -80,7 +80,7 @@ func init() {
 		LogLevels: logrus.AllLevels,
 	})
 
-	logrus.SetLevel(logrus.TraceLevel)
+	l.SetLevel(logrus.TraceLevel)
 
 	e = logrus.NewEntry(l)
 }

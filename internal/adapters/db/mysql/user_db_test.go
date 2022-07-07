@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"auth_pd/internal/domain/entity"
+	"auth_pd/pkg/logging"
 	"context"
 	"database/sql"
 	"github.com/stretchr/testify/assert"
@@ -14,6 +15,8 @@ const (
 	password = "so61ty872nst"
 	name     = "Carla"
 )
+
+var logger logging.Logger
 
 func createDbClient() *sql.DB {
 	db, _ := sql.Open(mysqlDriver, dataSourceName)
@@ -31,16 +34,21 @@ func createUser() *entity.User {
 	}
 }
 
+func init() {
+	logger = logging.GetLogger()
+	//logger.GetLoggerWithField("test", true)
+}
+
 func TestNewUserStorage(t *testing.T) {
 	db := createDbClient()
 	assert.NotEmpty(t, db, "ошибка при создании db клиента")
 
-	storage := NewUserStorage(db)
+	storage := NewUserStorage(db, &logger)
 	assert.NotEmpty(t, storage, "хранилище не инициализировано")
 }
 
 func TestUserStorage_Get(t *testing.T) {
-	storage := NewUserStorage(createDbClient())
+	storage := NewUserStorage(createDbClient(), &logger)
 	user, err := storage.Get(context.Background(), login, password)
 	require.Nil(t, err)
 	assert.EqualValues(t, name, user.FirstName, "данные в записи не совпадают")
@@ -48,7 +56,7 @@ func TestUserStorage_Get(t *testing.T) {
 
 // покрывает сразу 2 теста для Insert и Delete
 func TestUserStorage_Insert(t *testing.T) {
-	storage := NewUserStorage(createDbClient())
+	storage := NewUserStorage(createDbClient(), &logger)
 	user := createUser()
 	errI := storage.Insert(context.Background(), *user)
 	require.Nil(t, errI)
