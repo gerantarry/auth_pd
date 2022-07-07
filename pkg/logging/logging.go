@@ -61,7 +61,7 @@ func init() {
 		FullTimestamp: true,
 	}
 	//создание директории для хранения логов с правами -rw_-r__-r__
-	err := os.MkdirAll("app_logs", 0644)
+	err := os.MkdirAll("app_logs", 0644) //TODO нужно ставить папку для записи логов корректно а не там, где запускается лог
 	if err != nil {
 		panic(any(err))
 	}
