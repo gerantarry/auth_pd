@@ -65,7 +65,7 @@ func (s *userStorage) Get(ctx context.Context, login, password string) (*entity.
 }
 
 func (s *userStorage) Insert(ctx context.Context, user entity.User) error {
-	s.logger.Infof("Добавление в БД пользователя:\n %v", user)
+	s.logger.Infof("Добавление в БД пользователя: %v", user)
 	checkPing(ctx, s)
 	_, err := s.storage.ExecContext(
 		ctx,
@@ -75,7 +75,7 @@ func (s *userStorage) Insert(ctx context.Context, user entity.User) error {
 }
 
 func (s *userStorage) Delete(ctx context.Context, id int, login string) error {
-	s.logger.Infof("Удаление в БД пользователя :\n id: %d, login: %s", id, login)
+	s.logger.Infof("Удаление в БД пользователя. id: %d, login: %s", id, login)
 	checkPing(ctx, s)
 	_, err := s.storage.ExecContext(ctx,
 		"delete from pd.person where person_id = ? and login = ?",

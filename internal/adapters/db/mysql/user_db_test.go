@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"os"
 	"testing"
 )
 
@@ -35,8 +36,10 @@ func createUser() *entity.User {
 }
 
 func init() {
+	//TODO путь должен браться из конфигов
+	os.Setenv("PROJECT_DIR", "C:\\Users\\Anton\\GolandProjects\\auth_pd")
+	logging.Init()
 	logger = logging.GetLogger()
-	//logger.GetLoggerWithField("test", true)
 }
 
 func TestNewUserStorage(t *testing.T) {

@@ -49,7 +49,7 @@ func (l *Logger) GetLoggerWithField(k string, v interface{}) Logger {
 	return Logger{l.WithField(k, v)}
 }
 
-func init() {
+func Init() {
 	l := logrus.New()
 	l.SetReportCaller(true)
 	//найстройка формата записи логов
@@ -60,13 +60,17 @@ func init() {
 		},
 		FullTimestamp: true,
 	}
+
+	prjDir := os.Getenv("PROJECT_DIR")
+	logDir := prjDir + "/app_logs"
+
 	//создание директории для хранения логов с правами -rw_-r__-r__
-	err := os.MkdirAll("app_logs", 0644) //TODO нужно ставить папку для записи логов корректно а не там, где запускается лог
+	err := os.MkdirAll(logDir, 0644)
 	if err != nil {
 		panic(any(err))
 	}
 
-	allFiles, err := os.OpenFile("app_logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
+	allFiles, err := os.OpenFile(logDir+"/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
 	if err != nil {
 		panic(any(err))
 	}
@@ -81,6 +85,5 @@ func init() {
 	})
 
 	l.SetLevel(logrus.TraceLevel)
-
 	e = logrus.NewEntry(l)
 }

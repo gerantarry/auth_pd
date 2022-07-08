@@ -1,6 +1,9 @@
 package main
 
-import "auth_pd/pkg/logging"
+import (
+	"auth_pd/pkg/logging"
+	"os"
+)
 
 /*
 1. необходимо сделать многопоточность при обработки запросов (возможно все запросы и так работают в многопоточности)
@@ -17,9 +20,14 @@ Warning — неожиданные параметры вызова, странн
 Error — повод для внимания разработчиков. Тут интересно окружение конкретного места ошибки.
 Fatal — тут и так понятно. Выводим все до чего дотянуться можем, так как дальше приложение работать не будет.
 */
-
+func init() {
+	//TODO путь должен браться из конфигов
+	err := os.Setenv("PROJECT_DIR", "C:\\Users\\Anton\\GolandProjects\\auth_pd")
+	if err != nil {
+		panic(any(err))
+	}
+	logging.Init()
+}
 func main() {
-	l := logging.GetLogger()
-	l.Error("er")
-	l.Debug("ds")
+
 }
