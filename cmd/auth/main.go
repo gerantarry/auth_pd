@@ -1,7 +1,9 @@
 package main
 
 import (
+	"auth_pd/internal/adapters/router"
 	"auth_pd/pkg/logging"
+	"github.com/gin-gonic/gin"
 	"os"
 )
 
@@ -29,5 +31,20 @@ func init() {
 	logging.Init()
 }
 func main() {
+	l := logging.GetLogger()
+	r := router.NewRouter()
+	r.SetLogger(l)
+
+	r.GET("/test", func(c *gin.Context) {
+		c.String(200, "pong")
+	})
+	r.POST("/test", func(c *gin.Context) {
+		c.JSON(200, "{answer: 6}")
+	})
+
+	err := r.Run(":8080")
+	if err != nil {
+		panic(any(err))
+	}
 
 }
