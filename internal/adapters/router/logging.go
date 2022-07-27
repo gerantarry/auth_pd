@@ -1,5 +1,5 @@
 package router
 
 type Logger interface {
-	Info(params ...interface{})
+	Infof(format string, params ...interface{})
 }

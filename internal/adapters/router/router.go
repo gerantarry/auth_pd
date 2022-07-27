@@ -1,7 +1,9 @@
 package router
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"io"
 	"time"
 )
 
@@ -12,12 +14,9 @@ type router struct {
 var r *gin.Engine
 
 func NewRouter() *router {
+	r = gin.New()
+	r.Use(gin.Recovery())
 	return &router{r}
-}
-
-func Init() {
-	gin.Logger()
-
 }
 
 // SetLogger установка кастомного логгера
@@ -26,6 +25,12 @@ func (r *router) SetLogger(logger Logger) {
 		start := time.Now()
 		path := c.Request.URL.Path
 		raw := c.Request.URL.RawQuery
+		//читаем тело запроса
+		body, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			fmt.Printf("Cannot read body")
+		}
+		defer c.Request.Body.Close()
 
 		// before request
 
@@ -49,9 +54,17 @@ func (r *router) SetLogger(logger Logger) {
 		if raw != "" {
 			path = path + "?" + raw
 		}
-
 		params.Path = path
 
-		logger.Info(params)
+		paramsString := fmt.Sprintf("Method: %s | Status code: %d | Path: %s | Query: %v | Body: %v | ErrorMessage: %s | Latency: %v |",
+			params.Method,
+			params.StatusCode,
+			params.Path,
+			params.Keys,
+			string(body),
+			params.ErrorMessage,
+			params.Latency)
+
+		logger.Infof(paramsString)
 	})
 }
