@@ -1,6 +1,7 @@
 package router
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -30,7 +31,16 @@ func (r *router) SetLogger(logger Logger) {
 		if err != nil {
 			fmt.Printf("Cannot read body")
 		}
-		defer c.Request.Body.Close()
+		defer func() {
+			err := c.Request.Body.Close()
+			if err != nil {
+				logger.Errorf("Could not close Reader: \n" + err.Error())
+			}
+		}()
+		fmtBody, err := formatReaderData(bytes.NewReader(body))
+		if err != nil {
+			logger.Warnf(err.Error())
+		}
 
 		// before request
 
@@ -61,7 +71,7 @@ func (r *router) SetLogger(logger Logger) {
 			params.StatusCode,
 			params.Path,
 			params.Keys,
-			string(body),
+			fmtBody,
 			params.ErrorMessage,
 			params.Latency)
 

@@ -40,13 +40,13 @@ type Logger struct {
 }
 
 // GetLogger возращаем логгер-обертку над логгером logrus
-func GetLogger() Logger {
-	return Logger{e}
+func GetLogger() *Logger {
+	return &Logger{e}
 }
 
 // GetLoggerWithField для создания логгера содержащего определённые поля для вывода
-func (l *Logger) GetLoggerWithField(k string, v interface{}) Logger {
-	return Logger{l.WithField(k, v)}
+func (l *Logger) GetLoggerWithField(k string, v interface{}) *Logger {
+	return &Logger{l.WithField(k, v)}
 }
 
 func Init() {

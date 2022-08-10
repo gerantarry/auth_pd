@@ -24,6 +24,7 @@ Fatal — тут и так понятно. Выводим все до чего �
 */
 func init() {
 	//TODO путь должен браться из конфигов
+	//TODO попробовать на место value filepath.Dir(os.Args[0]) - это аргумент с
 	err := os.Setenv("PROJECT_DIR", "C:\\Users\\Anton\\GolandProjects\\auth_pd")
 	if err != nil {
 		panic(any(err))

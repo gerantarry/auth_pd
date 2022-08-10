@@ -17,7 +17,7 @@ const (
 	name     = "Carla"
 )
 
-var logger logging.Logger
+var logger *logging.Logger
 
 func createDbClient() *sql.DB {
 	db, _ := sql.Open(mysqlDriver, dataSourceName)
@@ -37,7 +37,10 @@ func createUser() *entity.User {
 
 func init() {
 	//TODO путь должен браться из конфигов
-	os.Setenv("PROJECT_DIR", "C:\\Users\\Anton\\GolandProjects\\auth_pd")
+	err := os.Setenv("PROJECT_DIR", "C:\\Users\\Anton\\GolandProjects\\auth_pd")
+	if err != nil {
+		panic(any(err))
+	}
 	logging.Init()
 	logger = logging.GetLogger()
 }
@@ -46,12 +49,12 @@ func TestNewUserStorage(t *testing.T) {
 	db := createDbClient()
 	assert.NotEmpty(t, db, "ошибка при создании db клиента")
 
-	storage := NewUserStorage(db, &logger)
+	storage := NewUserStorage(db, logger)
 	assert.NotEmpty(t, storage, "хранилище не инициализировано")
 }
 
 func TestUserStorage_Get(t *testing.T) {
-	storage := NewUserStorage(createDbClient(), &logger)
+	storage := NewUserStorage(createDbClient(), logger)
 	user, err := storage.Get(context.Background(), login, password)
 	require.Nil(t, err)
 	assert.EqualValues(t, name, user.FirstName, "данные в записи не совпадают")
@@ -59,7 +62,7 @@ func TestUserStorage_Get(t *testing.T) {
 
 // покрывает сразу 2 теста для Insert и Delete
 func TestUserStorage_Insert(t *testing.T) {
-	storage := NewUserStorage(createDbClient(), &logger)
+	storage := NewUserStorage(createDbClient(), logger)
 	user := createUser()
 	errI := storage.Insert(context.Background(), *user)
 	require.Nil(t, errI)

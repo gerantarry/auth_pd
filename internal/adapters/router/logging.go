@@ -8,6 +8,8 @@ import (
 
 type Logger interface {
 	Infof(format string, params ...interface{})
+	Warnf(format string, params ...interface{})
+	Errorf(format string, params ...interface{})
 }
 
 //убрать символы переноса строки и т.д. из входящих данных
@@ -35,15 +37,12 @@ func formatReaderData(r io.Reader) (string, error) {
 }
 
 //убирает сначала управляющие символы затем '\'
-func cleanString(str string) (clean string) {
-	preClean := strings.Map(func(r rune) rune {
+func cleanString(str string) string {
+	clean := strings.Map(func(r rune) rune {
 		if unicode.IsGraphic(r) {
 			return r
 		}
 		return -1
 	}, str)
-
-	//todo стереть после проверки clean = strings.TrimSuffix(preClean, "")
-
-	return preClean
+	return clean
 }
