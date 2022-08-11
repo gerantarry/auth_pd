@@ -5,6 +5,7 @@ import (
 	"auth_pd/pkg/logging"
 	"github.com/gin-gonic/gin"
 	"os"
+	"path/filepath"
 )
 
 /*
@@ -23,9 +24,8 @@ Error — повод для внимания разработчиков. Тут 
 Fatal — тут и так понятно. Выводим все до чего дотянуться можем, так как дальше приложение работать не будет.
 */
 func init() {
-	//TODO путь должен браться из конфигов
-	//TODO попробовать на место value filepath.Dir(os.Args[0]) - это аргумент с
-	err := os.Setenv("PROJECT_DIR", "C:\\Users\\Anton\\GolandProjects\\auth_pd")
+	projectPath := filepath.Dir(os.Args[0])
+	err := os.Setenv("PROJECT_DIR", projectPath)
 	if err != nil {
 		panic(any(err))
 	}
