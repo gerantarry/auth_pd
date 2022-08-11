@@ -4,3 +4,9 @@ is_debug: true
 listen:
   bind_ip: 0.0.0.0
   port: 8080
+database:
+  schema: pd
+  login: root
+  password: !QAZ2wsx#EDC
+  bind_ip: 127.0.0.1
+  port: 6603
