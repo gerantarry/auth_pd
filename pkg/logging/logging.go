@@ -9,6 +9,11 @@ import (
 	"runtime"
 )
 
+const (
+	logDir  = "/app_logs"
+	logFile = "/all.log"
+)
+
 type writerHook struct {
 	Writer    []io.Writer
 	LogLevels []logrus.Level
@@ -62,15 +67,15 @@ func Init() {
 	}
 
 	prjDir := os.Getenv("PROJECT_DIR")
-	logDir := prjDir + "/app_logs"
+	logDirPath := prjDir + logDir
 
 	//создание директории для хранения логов с правами -rw_-r__-r__
-	err := os.MkdirAll(logDir, 0644)
+	err := os.MkdirAll(logDirPath, 0644)
 	if err != nil {
 		panic(any(err))
 	}
 
-	allFiles, err := os.OpenFile(logDir+"/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
+	allFiles, err := os.OpenFile(logDirPath+logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
 	if err != nil {
 		panic(any(err))
 	}
