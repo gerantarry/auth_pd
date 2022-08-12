@@ -33,6 +33,10 @@ func init() {
 }
 func main() {
 	l := logging.GetLogger()
+	startServer(l)
+}
+
+func startServer(l *logging.Logger) {
 	r := router.NewRouter()
 	r.SetLogger(l)
 
@@ -47,5 +51,4 @@ func main() {
 	if err != nil {
 		panic(any(err))
 	}
-
 }
