@@ -6,7 +6,7 @@ import (
 )
 
 type Config struct {
-	IsDebug *bool `yaml:"is_debug"`
+	IsDebug bool `yaml:"is_debug"`
 	Listen  struct {
 		BindIp string `yaml:"bind_ip"`
 		Port   string `yaml:"port"`
@@ -16,17 +16,18 @@ type Config struct {
 		Login    string `yaml:"login"`
 		Password string `yaml:"password"`
 		BindIp   string `yaml:"bind_ip"`
-		port     string `yaml:"port"`
-	}
+		Port     string `yaml:"port"`
+	} `yaml:"database"`
 }
 
-var cfg Config
-var logger = logging.GetLogger()
+var cfg *Config
 
 func GetConfig() *Config {
-	err := cleanenv.ReadConfig("config.yaml", &cfg)
+	var logger = logging.GetLogger()
+	cfg = &Config{}
+	err := cleanenv.ReadConfig("config.yaml", cfg)
 	if err != nil {
-		logger.Panicf("Не удалось вычитать конфиг: %s", err.Error())
+		logger.Fatalf("Не удалось вычитать конфиг: %s", err.Error())
 	}
-	return &cfg
+	return cfg
 }
