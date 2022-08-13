@@ -54,7 +54,7 @@ func (l *Logger) GetLoggerWithField(k string, v interface{}) *Logger {
 	return &Logger{l.WithField(k, v)}
 }
 
-func Init() {
+func init() {
 	l := logrus.New()
 	l.SetReportCaller(true)
 	//найстройка формата записи логов

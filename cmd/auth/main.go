@@ -29,7 +29,6 @@ func init() {
 	if err != nil {
 		panic(any(err))
 	}
-	logging.Init()
 }
 func main() {
 	l := logging.GetLogger()

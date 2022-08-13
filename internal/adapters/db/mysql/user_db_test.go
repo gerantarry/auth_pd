@@ -41,7 +41,6 @@ func init() {
 	if err != nil {
 		panic(any(err))
 	}
-	logging.Init()
 	logger = logging.GetLogger()
 }
 
