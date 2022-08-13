@@ -3,6 +3,7 @@ package config
 import (
 	"auth_pd/pkg/logging"
 	"github.com/ilyakaznacheev/cleanenv"
+	"sync"
 )
 
 type Config struct {
@@ -21,13 +22,17 @@ type Config struct {
 }
 
 var cfg *Config
+var once sync.Once
 
 func GetConfig() *Config {
-	var logger = logging.GetLogger()
-	cfg = &Config{}
-	err := cleanenv.ReadConfig("config.yaml", cfg)
-	if err != nil {
-		logger.Fatalf("Не удалось вычитать конфиг: %s", err.Error())
-	}
+	once.Do(func() {
+		logger := logging.GetLogger()
+		logger.Infof("Чтение конфига")
+		cfg = &Config{}
+		err := cleanenv.ReadConfig("config.yaml", cfg)
+		if err != nil {
+			logger.Fatalf("Не удалось вычитать конфиг: %s", err.Error())
+		}
+	})
 	return cfg
 }
