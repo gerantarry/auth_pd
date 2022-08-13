@@ -7,7 +7,8 @@ import (
 )
 
 type Config struct {
-	IsDebug bool `yaml:"is_debug"`
+	IsDebug bool   `yaml:"is_debug"`
+	LogsDir string `yaml:"logs_dir"`
 	Listen  struct {
 		BindIp string `yaml:"bind_ip"`
 		Port   string `yaml:"port"`

@@ -2,7 +2,9 @@ package main
 
 import (
 	"auth_pd/internal/adapters/router"
+	"auth_pd/internal/config"
 	"auth_pd/pkg/logging"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"os"
 	"path/filepath"
@@ -32,7 +34,11 @@ func init() {
 }
 func main() {
 	l := logging.GetLogger()
-	startServer(l)
+	fmt.Println(l)
+	// startServer(l)
+	cfg := config.GetConfig()
+	fmt.Println(cfg.Database.Scheme)
+	fmt.Println(cfg.LogsDir)
 }
 
 func startServer(l *logging.Logger) {
