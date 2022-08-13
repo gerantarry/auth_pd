@@ -66,16 +66,13 @@ func init() {
 		FullTimestamp: true,
 	}
 
-	prjDir := os.Getenv("PROJECT_DIR")
-	logDirPath := prjDir + logDir
-
 	//создание директории для хранения логов с правами -rw_-r__-r__
-	err := os.MkdirAll(logDirPath, 0644)
+	err := os.MkdirAll(logDir, 0644)
 	if err != nil {
 		panic(any(err))
 	}
 
-	allFiles, err := os.OpenFile(logDirPath+logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
+	allFiles, err := os.OpenFile(logDir+logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
 	if err != nil {
 		panic(any(err))
 	}

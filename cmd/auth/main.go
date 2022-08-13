@@ -6,9 +6,9 @@ import (
 	"auth_pd/pkg/logging"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"os"
-	"path/filepath"
 )
+
+var cfg *config.Config
 
 /*
 1. необходимо сделать многопоточность при обработки запросов (возможно все запросы и так работают в многопоточности)
@@ -25,20 +25,13 @@ Warning — неожиданные параметры вызова, странн
 Error — повод для внимания разработчиков. Тут интересно окружение конкретного места ошибки.
 Fatal — тут и так понятно. Выводим все до чего дотянуться можем, так как дальше приложение работать не будет.
 */
-func init() {
-	projectPath := filepath.Dir(os.Args[0])
-	err := os.Setenv("PROJECT_DIR", projectPath)
-	if err != nil {
-		panic(any(err))
-	}
-}
 func main() {
+	cfg = config.GetConfig()
+
 	l := logging.GetLogger()
 	fmt.Println(l)
 	// startServer(l)
-	cfg := config.GetConfig()
 	fmt.Println(cfg.Database.Scheme)
-	fmt.Println(cfg.LogsDir)
 }
 
 func startServer(l *logging.Logger) {
