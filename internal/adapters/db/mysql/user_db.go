@@ -10,11 +10,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-const (
-	mysqlDriver    = "mysql"
-	dataSourceName = "root:!QAZ2wsx#EDC@tcp(127.0.0.1:6603)/pd" //TODO заменить хардкод на значение из конфиг файла
-)
-
 type Storage interface {
 	Get(ctx context.Context, login, password string) (*entity.User, error)
 	Insert(ctx context.Context, user entity.User) error
@@ -35,7 +30,7 @@ func NewUserStorage(db *sql.DB, logger *logging.Logger) *userStorage {
 func (s *userStorage) Get(ctx context.Context, login, password string) (*entity.User, error) {
 	checkPing(ctx, s)
 	s.logger.Infof("Поиск пользователя с login:%s", login)
-	row := s.storage.QueryRowContext(ctx, "select * from pd.person where login = ?", login) //TODO заменить хардкод названия схемы на значение из конфиг файла
+	row := s.storage.QueryRowContext(ctx, "select * from pd.person where login = ?", login)
 	user := entity.User{}
 	err := row.Scan(
 		&user.ID,
@@ -69,7 +64,7 @@ func (s *userStorage) Insert(ctx context.Context, user entity.User) error {
 	checkPing(ctx, s)
 	_, err := s.storage.ExecContext(
 		ctx,
-		"insert pd.person(first_name, second_name, login, password_hash, email) values(?, ?, ?, ?, ?)", //TODO заменить хардкод названия схемы на значение из конфиг файла
+		"insert pd.person(first_name, second_name, login, password_hash, email) values(?, ?, ?, ?, ?)",
 		user.FirstName, user.SecondName, user.Login, user.Password, user.Email)
 	return err
 }
@@ -80,7 +75,7 @@ func (s *userStorage) Delete(ctx context.Context, id int, login string) error {
 	_, err := s.storage.ExecContext(ctx,
 		"delete from pd.person where person_id = ? and login = ?",
 		id,
-		login) //TODO заменить хардкод названия схемы на значение из конфиг файла
+		login)
 	return err
 }
 

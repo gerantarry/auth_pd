@@ -12,9 +12,11 @@ import (
 )
 
 const (
-	login    = "user1_login"
-	password = "so61ty872nst"
-	name     = "Carla"
+	login          = "user1_login"
+	password       = "so61ty872nst"
+	name           = "Carla"
+	mysqlDriver    = "mysql"
+	dataSourceName = "root:!QAZ2wsx#EDC@tcp(127.0.0.1:6603)/pd"
 )
 
 var logger *logging.Logger

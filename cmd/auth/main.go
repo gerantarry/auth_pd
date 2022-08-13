@@ -27,11 +27,10 @@ Fatal — тут и так понятно. Выводим все до чего �
 */
 func main() {
 	cfg = config.GetConfig()
-
+	dataSourceName := formatDBSourceString()
+	fmt.Println(dataSourceName)
 	l := logging.GetLogger()
-	fmt.Println(l)
-	// startServer(l)
-	fmt.Println(cfg.Database.Scheme)
+	startServer(l)
 }
 
 func startServer(l *logging.Logger) {
@@ -49,4 +48,11 @@ func startServer(l *logging.Logger) {
 	if err != nil {
 		panic(any(err))
 	}
+}
+
+//приводим данные для бд к форматудля открытия соединения
+func formatDBSourceString() string {
+	return cfg.Database.Login +
+		":" + cfg.Database.Password +
+		"@tcp(" + cfg.Database.BindIp + ":" + cfg.Database.Port + ")/" + cfg.Database.Scheme
 }
