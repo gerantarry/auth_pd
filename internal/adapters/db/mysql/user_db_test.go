@@ -15,14 +15,13 @@ const (
 	login          = "user1_login"
 	password       = "so61ty872nst"
 	name           = "Carla"
-	mysqlDriver    = "mysql"
 	dataSourceName = "root:!QAZ2wsx#EDC@tcp(127.0.0.1:6603)/pd"
 )
 
 var logger *logging.Logger
 
 func createDbClient() *sql.DB {
-	db, _ := sql.Open(mysqlDriver, dataSourceName)
+	db, _ := sql.Open(DriverMySQL, dataSourceName)
 	return db
 }
 

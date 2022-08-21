@@ -10,6 +10,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+const DriverMySQL = "mysql"
+
 type Storage interface {
 	Get(ctx context.Context, login, password string) (*entity.User, error)
 	Insert(ctx context.Context, user entity.User) error
