@@ -1,6 +1,7 @@
 package main
 
 import (
+	"auth_pd/internal/adapters"
 	"auth_pd/internal/adapters/db/mysql"
 	"auth_pd/internal/adapters/router"
 	"auth_pd/internal/adapters/router/handlers"
@@ -26,17 +27,19 @@ Fatal — тут и так понятно. Выводим все до чего �
 func main() {
 	cfg = config.GetConfig()
 	dataSourceName := formatDBSourceString()
-	logger := logging.GetLogger()
+	//подключение logrus в adapters.AppLogger
+	var l adapters.Logger = logging.GetLogger()
+	logger := adapters.GetAppLogger(&l)
 	db, err := sql.Open(mysql.DriverMySQL, dataSourceName)
 	if err != nil {
 		logger.Panicf("Ошибка при открытии соединения с БД: %v", err)
 	}
 	var storage mysql.Storage = mysql.NewUserStorage(db, logger)
-	handler := handlers.NewHandler(&storage)
+	handler := handlers.NewHandler(&storage, logger)
 	startServer(handler, logger)
 }
 
-func startServer(h *handlers.Handler, l *logging.Logger) {
+func startServer(h *handlers.Handler, l *adapters.AppLogger) {
 	r := router.NewRouter()
 	r.SetLogger(l)
 

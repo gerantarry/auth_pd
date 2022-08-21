@@ -1,11 +1,14 @@
 package router
 
 import (
+	"auth_pd/internal/adapters"
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
+	"strings"
 	"time"
+	"unicode"
 )
 
 type router struct {
@@ -25,7 +28,7 @@ func NewRouter() *router {
 }
 
 // SetLogger установка кастомного логгера
-func (r *router) SetLogger(logger Logger) {
+func (r *router) SetLogger(logger adapters.Logger) {
 	r.Use(func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
@@ -81,4 +84,39 @@ func (r *router) SetLogger(logger Logger) {
 
 		logger.Infof(paramsString)
 	})
+}
+
+//убрать символы переноса строки и т.д. из входящих данных
+func formatReaderData(r io.Reader) (string, error) {
+	buf := make([]byte, 2048)
+	n, err := r.Read(buf)
+	var str, resStr string
+
+	for {
+		for _, b := range buf[:n] {
+			str = str + string(b)
+		}
+		if err == io.EOF {
+			resStr = cleanString(str)
+			return resStr, nil
+		}
+		if err != nil {
+			return "", err
+		}
+
+		resStr = cleanString(str)
+		return resStr, nil
+	}
+
+}
+
+//убирает сначала управляющие символы затем '\'
+func cleanString(str string) string {
+	clean := strings.Map(func(r rune) rune {
+		if unicode.IsGraphic(r) {
+			return r
+		}
+		return -1
+	}, str)
+	return clean
 }
