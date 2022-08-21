@@ -1,12 +1,12 @@
 package main
 
 import (
+	"auth_pd/internal/adapters/db/mysql"
 	"auth_pd/internal/adapters/router"
 	"auth_pd/internal/adapters/router/handlers"
 	"auth_pd/internal/config"
 	"auth_pd/pkg/logging"
-	"fmt"
-	"github.com/gin-gonic/gin"
+	"database/sql"
 )
 
 var cfg *config.Config
@@ -14,9 +14,6 @@ var cfg *config.Config
 /*
 1. необходимо сделать многопоточность при обработки запросов (возможно все запросы и так работают в многопоточности)
 2. пробрасывать ctx context.Context; Определить контекст ContextWithTimeout()
-3. сделать конфиг файл с которого должны подтягиваться значения { логин и пароль к БД, название схемы БД }
-4. добавить логирование
-
 
 
 Trace — вывод всего подряд. На тот случай, если Debug не позволяет локализовать ошибку. В нем полезно отмечать вызовы разнообразных блокирующих и асинхронных операций.
@@ -29,22 +26,21 @@ Fatal — тут и так понятно. Выводим все до чего �
 func main() {
 	cfg = config.GetConfig()
 	dataSourceName := formatDBSourceString()
-	fmt.Println(dataSourceName)
-	l := logging.GetLogger()
-	startServer(l)
+	logger := logging.GetLogger()
+	db, err := sql.Open(mysql.DriverMySQL, dataSourceName)
+	if err != nil {
+		logger.Panicf("Ошибка при открытии соединения с БД: %v", err)
+	}
+	var storage mysql.Storage = mysql.NewUserStorage(db, logger)
+	handler := handlers.NewHandler(&storage)
+	startServer(handler, logger)
 }
 
-func startServer(l *logging.Logger) {
+func startServer(h *handlers.Handler, l *logging.Logger) {
 	r := router.NewRouter()
 	r.SetLogger(l)
 
-	r.GET("/test", func(c *gin.Context) {
-		c.String(200, "pong")
-	})
-	r.POST("/test", func(c *gin.Context) {
-		c.JSON(200, "{answer: 6}")
-	})
-	r.POST("/register", handlers.Register)
+	r.POST("/register", h.Register)
 
 	err := r.Run(":8080")
 	if err != nil {
