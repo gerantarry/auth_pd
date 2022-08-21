@@ -3,16 +3,17 @@ package handlers
 import (
 	"auth_pd/internal/adapters/db/mysql"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-type handler struct {
+type Handler struct {
 	storage *mysql.Storage
 }
 
-func NewHandler(stg *mysql.Storage) *handler {
-	return &handler{storage: stg}
+func NewHandler(stg *mysql.Storage) *Handler {
+	return &Handler{storage: stg}
 }
 
-func Register(c *gin.Context) {
-
+func (h *Handler) Register(c *gin.Context) {
+	c.JSON(http.StatusOK, "register test OK")
 }
