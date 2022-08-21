@@ -17,6 +17,10 @@ var r *gin.Engine
 func NewRouter() *router {
 	r = gin.New()
 	r.Use(gin.Recovery())
+	if err := r.SetTrustedProxies(nil); err != nil {
+		fmt.Println("Ошибка при настройке разрешённых proxy")
+		panic(any(err))
+	}
 	return &router{r}
 }
 
