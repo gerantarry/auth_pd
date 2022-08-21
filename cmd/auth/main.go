@@ -2,6 +2,7 @@ package main
 
 import (
 	"auth_pd/internal/adapters/router"
+	"auth_pd/internal/adapters/router/handlers"
 	"auth_pd/internal/config"
 	"auth_pd/pkg/logging"
 	"fmt"
@@ -43,6 +44,7 @@ func startServer(l *logging.Logger) {
 	r.POST("/test", func(c *gin.Context) {
 		c.JSON(200, "{answer: 6}")
 	})
+	r.POST("/register", handlers.Register)
 
 	err := r.Run(":8080")
 	if err != nil {
