@@ -1,7 +1,7 @@
 package dto
 
-//dto для регистрации УЗ
-type registerForm struct {
+// RegisterForm - dto для регистрации УЗ
+type RegisterForm struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
