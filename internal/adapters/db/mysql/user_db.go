@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	"auth_pd/internal/adapters"
 	"auth_pd/internal/domain/entity"
+	"auth_pd/pkg/logging"
 	"context"
 	"database/sql"
 	"errors"
@@ -21,11 +21,11 @@ type Storage interface {
 
 type userStorage struct {
 	storage sql.DB
-	logger  *adapters.AppLogger
+	logger  *logging.Logger
 }
 
 //NewUserStorage - конструктор
-func NewUserStorage(db *sql.DB, logger *adapters.AppLogger) *userStorage {
+func NewUserStorage(db *sql.DB, logger *logging.Logger) *userStorage {
 	return &userStorage{storage: *db, logger: logger}
 }
 

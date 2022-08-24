@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"auth_pd/internal/adapters"
 	"auth_pd/internal/adapters/db/mysql"
 	"auth_pd/internal/domain/dto"
+	"auth_pd/pkg/logging"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -12,10 +12,10 @@ import (
 
 type Handler struct {
 	storage *mysql.Storage
-	logger  *adapters.AppLogger
+	logger  *logging.Logger
 }
 
-func NewHandler(stg *mysql.Storage, l *adapters.AppLogger) *Handler {
+func NewHandler(stg *mysql.Storage, l *logging.Logger) *Handler {
 	return &Handler{
 		storage: stg,
 		logger:  l,
