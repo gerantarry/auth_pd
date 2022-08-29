@@ -33,7 +33,7 @@ func main() {
 		logger.Panicf("Ошибка при открытии соединения с БД: %v", err)
 	}
 	var storage mysql.Storage = mysql.NewUserStorage(db, logger)
-	handler := handlers.NewHandler(&storage, logger)
+	handler := handlers.NewHandler(storage, logger)
 	startServer(handler)
 }
 
