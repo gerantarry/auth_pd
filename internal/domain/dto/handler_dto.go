@@ -8,8 +8,8 @@ type RegisterForm struct {
 	FirstName string `json:"firstName"`
 }
 
-// ErrorResponse - dto для ответа с ошибкой
-type ErrorResponse struct {
+// StatusResponse - dto для ответа содержащего статус по проделанной операции
+type StatusResponse struct {
 	Status      bool   `json:"status"`
 	Description string `json:"description"`
 }

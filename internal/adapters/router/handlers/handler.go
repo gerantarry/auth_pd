@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"auth_pd/internal/adapters/db/mysql"
+	"auth_pd/internal/adapters/db/mysql_"
 	"auth_pd/internal/domain/dto"
 	"auth_pd/internal/domain/entity"
 	"auth_pd/pkg/logging"
@@ -9,15 +9,16 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/go-sql-driver/mysql"
 	"net/http"
 )
 
 type Handler struct {
-	storage mysql.Storage
+	storage mysql_.Storage
 	logger  *logging.Logger
 }
 
-func NewHandler(stg mysql.Storage, l *logging.Logger) *Handler {
+func NewHandler(stg mysql_.Storage, l *logging.Logger) *Handler {
 	return &Handler{
 		storage: stg,
 		logger:  l,
@@ -33,5 +34,30 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 	fmt.Println(regForm)
+	user := entity.User{
+		FirstName: regForm.FirstName,
+		Login:     regForm.Username,
+		Password:  regForm.Password,
+		Email:     regForm.Email,
+	}
+
+	err := h.storage.Insert(context.Background(), user)
+	if err != nil {
+		var errResp dto.StatusResponse
+		tErr, ok := err.(*mysql.MySQLError)
+		if ok {
+			h.logger.Error(tErr.Message)
+			if tErr.Number == 1062 {
+				errResp = dto.StatusResponse{
+					Description: "Это имя пользователя уже зарегистрировано.",
+				}
+			} else {
+				errResp.Description = err.Error()
+			}
+		}
+		c.AbortWithStatusJSON(http.StatusOK, errResp)
+		return
+	}
+
 	c.JSON(http.StatusOK, "register test OK")
 }
