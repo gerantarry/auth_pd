@@ -28,12 +28,14 @@ func NewHandler(stg mysql_.Storage, l *logging.Logger) *Handler {
 //TODO нарушено логирование при двойном вызове c.Request.Body
 func (h *Handler) Register(c *gin.Context) {
 	var regForm dto.RegisterForm
+
 	h.logger.Debug("Получен запрос. Начинаем биндить тело")
 	if err := c.MustBindWith(&regForm, binding.JSON); err != nil {
 		h.logger.Errorf("Не удалось разобрать запрос. Причина - %v", err.Error())
 		return
 	}
 	fmt.Println(regForm)
+
 	user := entity.User{
 		FirstName: regForm.FirstName,
 		Login:     regForm.Username,
@@ -41,23 +43,27 @@ func (h *Handler) Register(c *gin.Context) {
 		Email:     regForm.Email,
 	}
 
+	var resp dto.StatusResponse
+
 	err := h.storage.Insert(context.Background(), user)
 	if err != nil {
-		var errResp dto.StatusResponse
+		//TODO нужно захэшировать пароли ? изза одинаковых паролей БД кидает ошибку
 		tErr, ok := err.(*mysql.MySQLError)
 		if ok {
 			h.logger.Error(tErr.Message)
 			if tErr.Number == 1062 {
-				errResp = dto.StatusResponse{
+				resp = dto.StatusResponse{
 					Description: "Это имя пользователя уже зарегистрировано.",
 				}
 			} else {
-				errResp.Description = err.Error()
+				resp.Description = err.Error()
 			}
 		}
-		c.AbortWithStatusJSON(http.StatusOK, errResp)
+		c.AbortWithStatusJSON(http.StatusOK, resp)
 		return
 	}
 
-	c.JSON(http.StatusOK, "register test OK")
+	resp = dto.StatusResponse{Status: true, Description: "Регистрация прошла успешно!"}
+
+	c.JSON(http.StatusOK, resp)
 }
