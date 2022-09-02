@@ -1,4 +1,4 @@
-package mysql
+package mysql_
 
 import (
 	"auth_pd/internal/domain/entity"

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"auth_pd/internal/adapters/db/mysql"
+	"auth_pd/internal/adapters/db/mysql_"
 	"auth_pd/internal/adapters/router"
 	"auth_pd/internal/adapters/router/handlers"
 	"auth_pd/internal/config"
@@ -28,11 +28,11 @@ func main() {
 	dataSourceName := formatDBSourceString()
 	//подключение logrus в adapters.AppLogger
 	logger := logging.GetLogger()
-	db, err := sql.Open(mysql.DriverMySQL, dataSourceName)
+	db, err := sql.Open(mysql_.DriverMySQL, dataSourceName)
 	if err != nil {
 		logger.Panicf("Ошибка при открытии соединения с БД: %v", err)
 	}
-	var storage mysql.Storage = mysql.NewUserStorage(db, logger)
+	var storage mysql_.Storage = mysql_.NewUserStorage(db, logger)
 	handler := handlers.NewHandler(storage, logger)
 	startServer(handler)
 }
