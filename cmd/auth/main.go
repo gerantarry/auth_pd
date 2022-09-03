@@ -3,8 +3,8 @@ package main
 import (
 	"auth_pd/internal/adapters/db/mysql_"
 	"auth_pd/internal/adapters/router"
-	"auth_pd/internal/adapters/router/handlers"
 	"auth_pd/internal/config"
+	"auth_pd/internal/usecase/handlers"
 	"auth_pd/pkg/logging"
 	"database/sql"
 )
