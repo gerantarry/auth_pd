@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-sql-driver/mysql"
 	"net/http"
+	"time"
 )
 
 type Handler struct {
@@ -44,8 +45,10 @@ func (h *Handler) Register(c *gin.Context) {
 	}
 
 	var resp dto.StatusResponse
-
-	err := h.storage.Insert(context.Background(), user)
+	//TODO defer cancel() - прописать кейс, когда отменяется по таймауту. Что делать тогда?
+	var ctx, cancel = context.WithTimeout(context.Background(), 20*time.Second)
+	err := h.storage.Insert(ctx, user)
+	defer cancel()
 	if err != nil {
 		//TODO нужно захэшировать пароли ? изза одинаковых паролей БД кидает ошибку
 		tErr, ok := err.(*mysql.MySQLError)
