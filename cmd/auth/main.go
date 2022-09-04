@@ -4,7 +4,7 @@ import (
 	"auth_pd/internal/adapters/db/mysql_"
 	"auth_pd/internal/adapters/router"
 	"auth_pd/internal/config"
-	"auth_pd/internal/usecase/handlers"
+	"auth_pd/internal/controller/user"
 	"auth_pd/pkg/logging"
 	"database/sql"
 )
@@ -33,11 +33,11 @@ func main() {
 		logger.Panicf("Ошибка при открытии соединения с БД: %v", err)
 	}
 	var storage mysql_.Storage = mysql_.NewUserStorage(db, logger)
-	handler := handlers.NewHandler(storage, logger)
+	handler := user.NewController(storage, logger)
 	startServer(handler)
 }
 
-func startServer(h *handlers.Handler) {
+func startServer(h *user.Controller) {
 	r := router.NewRouter()
 
 	r.POST("/register", h.Register)
