@@ -4,6 +4,7 @@ import (
 	"auth_pd/internal/adapters/db/mysql_"
 	"auth_pd/internal/domain/dto"
 	"auth_pd/internal/domain/entity"
+	"auth_pd/internal/usecase/password"
 	"auth_pd/pkg/logging"
 	"context"
 	"fmt"
@@ -28,19 +29,19 @@ func NewController(stg mysql_.Storage, l *logging.Logger) *Controller {
 
 //TODO нарушено логирование при двойном вызове c.Request.Body
 func (ctrl *Controller) Register(c *gin.Context) {
-	var regForm dto.RegisterForm
-
 	ctrl.logger.Debug("Получен запрос. Начинаем биндить тело")
+	var regForm dto.RegisterForm
 	if err := c.MustBindWith(&regForm, binding.JSON); err != nil {
 		ctrl.logger.Errorf("Не удалось разобрать запрос. Причина - %v", err.Error())
 		return
 	}
-	fmt.Println(regForm)
+	fmt.Println(regForm) //удалить, когда научусь логировать тело
 
+	hashedPsw := password.HashPassword(regForm.Password)
 	user := entity.User{
 		FirstName: regForm.FirstName,
 		Login:     regForm.Username,
-		Password:  regForm.Password,
+		Password:  hashedPsw,
 		Email:     regForm.Email,
 	}
 
@@ -50,18 +51,17 @@ func (ctrl *Controller) Register(c *gin.Context) {
 	err := ctrl.storage.Insert(ctx, user)
 	defer cancel()
 	if err != nil {
-		//TODO нужно захэшировать пароли ? изза одинаковых паролей БД кидает ошибку
 		tErr, ok := err.(*mysql.MySQLError)
+
 		if ok {
 			ctrl.logger.Error(tErr.Message)
 			if tErr.Number == 1062 {
-				resp = dto.StatusResponse{
-					Description: "Это имя пользователя уже зарегистрировано.",
-				}
+				resp.Description = "Это имя пользователя уже зарегистрировано."
 			} else {
 				resp.Description = err.Error()
 			}
 		}
+
 		c.AbortWithStatusJSON(http.StatusOK, resp)
 		return
 	}

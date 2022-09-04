@@ -26,7 +26,6 @@ Fatal — тут и так понятно. Выводим все до чего �
 func main() {
 	cfg = config.GetConfig()
 	dataSourceName := formatDBSourceString()
-	//подключение logrus в adapters.AppLogger
 	logger := logging.GetLogger()
 	db, err := sql.Open(mysql_.DriverMySQL, dataSourceName)
 	if err != nil {
@@ -39,9 +38,7 @@ func main() {
 
 func startServer(h *user.Controller) {
 	r := router.NewRouter()
-
 	r.POST("/register", h.Register)
-
 	err := r.Run(":8080")
 	if err != nil {
 		panic(any(err))
