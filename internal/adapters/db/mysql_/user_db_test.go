@@ -52,7 +52,7 @@ func TestNewUserStorage(t *testing.T) {
 
 func TestUserStorage_Get(t *testing.T) {
 	storage := NewUserStorage(createDbClient(), logger)
-	user, err := storage.Get(context.Background(), login, password)
+	user, err := storage.GetUser(context.Background(), login, password)
 	require.Nil(t, err)
 	assert.EqualValues(t, name, user.FirstName, "данные в записи не совпадают")
 }
@@ -63,7 +63,7 @@ func TestUserStorage_Insert(t *testing.T) {
 	user := createUser()
 	errI := storage.Insert(context.Background(), *user)
 	require.Nil(t, errI)
-	getUser, errG := storage.Get(context.Background(), user.Login, user.Password)
+	getUser, errG := storage.GetUser(context.Background(), user.Login, user.Password)
 	require.Nil(t, errG)
 	assert.EqualValues(t, user.Login, getUser.Login)
 	assert.EqualValues(t, user.Password, getUser.Password)

@@ -13,10 +13,12 @@ import (
 const DriverMySQL = "mysql"
 
 type Storage interface {
-	Get(ctx context.Context, login, password string) (*entity.User, error)
+	GetUser(ctx context.Context, login, password string) (*entity.User, error)
 	Insert(ctx context.Context, user entity.User) error
 	Delete(ctx context.Context, id int, login string) error
 	Update(ctx context.Context, id int, login string) error
+
+	GetTricks(ctx context.Context)
 }
 
 type userStorage struct {
@@ -29,7 +31,7 @@ func NewUserStorage(db *sql.DB, logger *logging.Logger) *userStorage {
 	return &userStorage{storage: *db, logger: logger}
 }
 
-func (s *userStorage) Get(ctx context.Context, login, password string) (*entity.User, error) {
+func (s *userStorage) GetUser(ctx context.Context, login, password string) (*entity.User, error) {
 	checkPing(ctx, s)
 	s.logger.Infof("Поиск пользователя с login:%s", login)
 	row := s.storage.QueryRowContext(ctx, "select * from pd.person where login = ?", login)
