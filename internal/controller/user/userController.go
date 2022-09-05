@@ -15,6 +15,11 @@ import (
 	"time"
 )
 
+const (
+	usernameAlreadyExistMsg = "Это имя пользователя уже зарегистрировано."
+	registerSuccessMsg      = "Регистрация прошла успешно!"
+)
+
 type Controller struct {
 	storage mysql_.Storage
 	logger  *logging.Logger
@@ -46,27 +51,34 @@ func (ctrl *Controller) Register(c *gin.Context) {
 	}
 
 	var resp dto.StatusResponse
-	//TODO defer cancel() - прописать кейс, когда отменяется по таймауту. Что делать тогда?
-	var ctx, cancel = context.WithTimeout(context.Background(), 20*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	err := ctrl.storage.Insert(ctx, user)
 	defer cancel()
 	if err != nil {
-		tErr, ok := err.(*mysql.MySQLError)
-
-		if ok {
-			ctrl.logger.Error(tErr.Message)
-			if tErr.Number == 1062 {
-				resp.Description = "Это имя пользователя уже зарегистрировано."
-			} else {
-				resp.Description = err.Error()
+		switch e := err.(type) {
+		case *mysql.MySQLError:
+			{
+				if e.Number == 1062 {
+					resp.Description = usernameAlreadyExistMsg
+				} else {
+					resp.Description = e.Message
+				}
+				c.AbortWithStatusJSON(http.StatusBadRequest, resp)
+				return
 			}
+		default:
+			break
+		}
+		if err.Error() == context.DeadlineExceeded.Error() {
+			c.AbortWithStatus(http.StatusRequestTimeout)
+			return
 		}
 
+		resp.Description = err.Error()
 		c.AbortWithStatusJSON(http.StatusOK, resp)
 		return
 	}
 
-	resp = dto.StatusResponse{Status: true, Description: "Регистрация прошла успешно!"}
-
+	resp = dto.StatusResponse{Status: true, Description: registerSuccessMsg}
 	c.JSON(http.StatusOK, resp)
 }
