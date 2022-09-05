@@ -5,5 +5,6 @@ type Trick struct {
 	DifficultyLevel int    `json:"difficulty_level"`
 	VideoId         int    `json:"video_id"`
 	Name            string `json:"name"`
+	AdditionalNames string `json:"additional_names"`
 	Description     string `json:"description"`
 }

@@ -18,7 +18,7 @@ type Storage interface {
 	Delete(ctx context.Context, id int, login string) error
 	Update(ctx context.Context, id int, login string) error
 
-	GetTricks(ctx context.Context)
+	GetTricks(ctx context.Context) ([]entity.Trick, error)
 }
 
 type userStorage struct {
@@ -91,6 +91,41 @@ func (s *userStorage) Update(ctx context.Context, id int, login string) error {
 		id,
 		login)
 	return err
+}
+
+func (s *userStorage) GetTricks(ctx context.Context) ([]*entity.Trick, error) {
+	checkPing(ctx, s)
+	s.logger.Debug("Ищем в базе все трюки")
+	rows, err := s.storage.Query("select * from pd.tricks")
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			s.logger.Panic(err)
+		}
+	}()
+
+	var tricks []*entity.Trick
+	for rows.Next() {
+		trick := entity.Trick{}
+		err := rows.Scan(
+			&trick.TrickId,
+			&trick.DifficultyLevel,
+			&trick.VideoId,
+			&trick.Name,
+			&trick.AdditionalNames,
+			&trick.Description,
+		)
+		if err != nil {
+			s.logger.Error(err.Error())
+			continue
+		}
+		tricks = append(tricks, &trick)
+	}
+
+	return tricks, nil
 }
 
 func checkPing(ctx context.Context, s *userStorage) {

@@ -18,7 +18,8 @@ const (
 	dataSourceName = "root:!QAZ2wsx#EDC@tcp(127.0.0.1:6603)/pd"
 )
 
-var logger *logging.Logger
+var logger = logging.GetLogger()
+var storage = NewUserStorage(createDbClient(), logger)
 
 func createDbClient() *sql.DB {
 	db, _ := sql.Open(DriverMySQL, dataSourceName)
@@ -37,7 +38,6 @@ func createUser() *entity.User {
 }
 
 func init() {
-	logger = logging.GetLogger()
 	//убираем запись логов в файл на тестах
 	logger.Logger.SetOutput(io.Discard)
 }
@@ -46,12 +46,10 @@ func TestNewUserStorage(t *testing.T) {
 	db := createDbClient()
 	assert.NotEmpty(t, db, "ошибка при создании db клиента")
 
-	storage := NewUserStorage(db, logger)
 	assert.NotEmpty(t, storage, "хранилище не инициализировано")
 }
 
 func TestUserStorage_Get(t *testing.T) {
-	storage := NewUserStorage(createDbClient(), logger)
 	user, err := storage.GetUser(context.Background(), login, password)
 	require.Nil(t, err)
 	assert.EqualValues(t, name, user.FirstName, "данные в записи не совпадают")
@@ -59,7 +57,6 @@ func TestUserStorage_Get(t *testing.T) {
 
 // покрывает сразу 2 теста для Insert и Delete
 func TestUserStorage_Insert(t *testing.T) {
-	storage := NewUserStorage(createDbClient(), logger)
 	user := createUser()
 	errI := storage.Insert(context.Background(), *user)
 	require.Nil(t, errI)
