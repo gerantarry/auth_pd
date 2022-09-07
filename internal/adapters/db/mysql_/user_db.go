@@ -18,7 +18,7 @@ type Storage interface {
 	Delete(ctx context.Context, id int, login string) error
 	Update(ctx context.Context, id int, login string) error
 
-	GetTricks(ctx context.Context) ([]entity.Trick, error)
+	GetTricks(ctx context.Context) ([]*entity.Trick, error)
 }
 
 type userStorage struct {

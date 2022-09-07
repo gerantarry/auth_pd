@@ -1,4 +1,4 @@
-package user
+package controller
 
 import (
 	"auth_pd/internal/adapters/db/mysql_"
@@ -20,24 +20,24 @@ const (
 	registerSuccessMsg      = "Регистрация прошла успешно!"
 )
 
-type Controller struct {
+type Handler struct {
 	storage mysql_.Storage
 	logger  *logging.Logger
 }
 
-func NewController(stg mysql_.Storage, l *logging.Logger) *Controller {
-	return &Controller{
+func NewHandler(stg mysql_.Storage, l *logging.Logger) *Handler {
+	return &Handler{
 		storage: stg,
 		logger:  l,
 	}
 }
 
 //TODO нарушено логирование при двойном вызове c.Request.Body
-func (ctrl *Controller) Register(c *gin.Context) {
-	ctrl.logger.Debug("Получен запрос. Начинаем биндить тело")
+func (h *Handler) Register(c *gin.Context) {
+	h.logger.Debug("Получен запрос. Начинаем биндить тело")
 	var regForm dto.RegisterForm
 	if err := c.MustBindWith(&regForm, binding.JSON); err != nil {
-		ctrl.logger.Errorf("Не удалось разобрать запрос. Причина - %v", err.Error())
+		h.logger.Errorf("Не удалось разобрать запрос. Причина - %v", err.Error())
 		return
 	}
 	fmt.Println(regForm) //удалить, когда научусь логировать тело
@@ -52,7 +52,7 @@ func (ctrl *Controller) Register(c *gin.Context) {
 
 	var resp dto.StatusResponse
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	err := ctrl.storage.Insert(ctx, user)
+	err := h.storage.Insert(ctx, user)
 	defer cancel()
 	if err != nil {
 		switch e := err.(type) {
@@ -81,4 +81,9 @@ func (ctrl *Controller) Register(c *gin.Context) {
 
 	resp = dto.StatusResponse{Status: true, Description: registerSuccessMsg}
 	c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) Login(c *gin.Context) {
+	gin.BasicAuth()
+
 }
