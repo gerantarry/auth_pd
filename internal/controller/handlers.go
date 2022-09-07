@@ -18,6 +18,7 @@ import (
 const (
 	usernameAlreadyExistMsg = "Это имя пользователя уже зарегистрировано."
 	registerSuccessMsg      = "Регистрация прошла успешно!"
+	userNotFoundMsg         = "Неправильно набрал логин и/или пароль."
 )
 
 type Handler struct {
@@ -35,25 +36,25 @@ func NewHandler(stg mysql_.Storage, l *logging.Logger) *Handler {
 //TODO нарушено логирование при двойном вызове c.Request.Body
 func (h *Handler) Register(c *gin.Context) {
 	h.logger.Debug("Получен запрос. Начинаем биндить тело")
-	var regForm dto.RegisterForm
-	if err := c.MustBindWith(&regForm, binding.JSON); err != nil {
+	var regDto dto.RegisterRequestDto
+	if err := c.MustBindWith(&regDto, binding.JSON); err != nil {
 		h.logger.Errorf("Не удалось разобрать запрос. Причина - %v", err.Error())
 		return
 	}
-	fmt.Println(regForm) //удалить, когда научусь логировать тело
+	fmt.Println(regDto) //удалить, когда научусь логировать тело
 
-	hashedPsw := password.HashPassword(regForm.Password)
+	hashedPsw := password.HashPassword(regDto.Password)
 	user := entity.User{
-		FirstName: regForm.FirstName,
-		Login:     regForm.Username,
+		FirstName: regDto.FirstName,
+		Login:     regDto.Username,
 		Password:  hashedPsw,
-		Email:     regForm.Email,
+		Email:     regDto.Email,
 	}
 
 	var resp dto.StatusResponse
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	err := h.storage.Insert(ctx, user)
 	defer cancel()
+	err := h.storage.Insert(ctx, user)
 	if err != nil {
 		switch e := err.(type) {
 		case *mysql.MySQLError:
