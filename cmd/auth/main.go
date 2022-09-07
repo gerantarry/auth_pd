@@ -39,6 +39,7 @@ func main() {
 func startServer(h *controller.Handler) {
 	r := router.NewRouter()
 	r.POST("/register", h.Register)
+	r.POST("/login", h.Login)
 	err := r.Run(":8080")
 	if err != nil {
 		panic(any(err))

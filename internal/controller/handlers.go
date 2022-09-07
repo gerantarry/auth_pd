@@ -80,11 +80,46 @@ func (h *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	resp = dto.StatusResponse{Status: true, Description: registerSuccessMsg}
+	resp = dto.StatusResponse{Success: true, Description: registerSuccessMsg}
 	c.JSON(http.StatusOK, resp)
 }
 
+// Login
+// запрос вида
+//{"username": "$username", "password": "$password"}
 func (h *Handler) Login(c *gin.Context) {
-	gin.BasicAuth()
+	cCp := c.Copy()
+	var bodyBuff []byte
+	_, err := cCp.Request.Body.Read(bodyBuff)
+	h.logger.Debugf("Поступил запрос, %v", string(bodyBuff))
+	var loginDto dto.LoginRequestDto
+	if err := c.MustBindWith(&loginDto, binding.JSON); err != nil {
+		h.logger.Errorf("Не удалось разобрать запрос. Причина - %v", err.Error())
+		return
+	}
+	h.logger.Infof("Запрос на login пользователем %s", loginDto.Username)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	var response dto.StatusResponse
+	user, err := h.storage.GetUser(ctx, loginDto.Username)
+	if err != nil {
+		h.logger.Errorf("Ошибка при поиске пользователя в базе: %v", err)
+		response.Description = userNotFoundMsg
+		c.JSON(http.StatusBadRequest, response)
+	}
+
+	isSame := password.VerifyPassword(loginDto.Password, user.Password)
+	if isSame {
+		//TODO формируем и возвращаем токен. Через c.Writer.Header установить Authorize: Bearer token
+		h.logger.Info("Формирование токена для пользователя")
+		response.Success = true
+		response.Description = "Авторизация успешно завершена."
+		c.JSON(http.StatusOK, response)
+	} else {
+		response.Description = userNotFoundMsg
+		c.JSON(http.StatusBadRequest, response)
+	}
 
 }
