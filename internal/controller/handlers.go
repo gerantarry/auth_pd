@@ -4,7 +4,7 @@ import (
 	"auth_pd/internal/adapters/db/mysql_"
 	"auth_pd/internal/domain/dto"
 	"auth_pd/internal/domain/entity"
-	"auth_pd/internal/usecase/password"
+	"auth_pd/internal/usecase/authorization/password"
 	"auth_pd/pkg/logging"
 	"context"
 	"fmt"
