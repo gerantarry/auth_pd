@@ -1,15 +1,18 @@
 package main
 
 import (
-	"auth_pd/internal/adapters/db/mysql_"
 	"auth_pd/internal/adapters/router"
 	"auth_pd/internal/config"
 	"auth_pd/internal/controller"
 	"auth_pd/pkg/logging"
-	"database/sql"
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
 var cfg *config.Config
+var ctx, cancel = context.WithTimeout(context.Background(), time.Second*15)
 
 /*
 1. необходимо сделать многопоточность при обработки запросов (возможно все запросы и так работают в многопоточности)
@@ -25,15 +28,19 @@ Fatal — тут и так понятно. Выводим все до чего �
 */
 func main() {
 	cfg = config.GetConfig()
-	dataSourceName := formatDBSourceString()
 	logger := logging.GetLogger()
-	db, err := sql.Open(mysql_.DriverMySQL, dataSourceName)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+cfg.Database.BindIp+":"+cfg.Database.Port))
 	if err != nil {
 		logger.Panicf("Ошибка при открытии соединения с БД: %v", err)
 	}
-	var storage mysql_.Storage = mysql_.NewUserStorage(db, logger)
+	defer func() {
+		if err = client.Disconnect(ctx); err != nil {
+			panic(any(err))
+		}
+	}()
+	/*var storage mng.Storage = mng.NewUserStorage(client, logger)
 	handler := controller.NewHandler(storage, logger)
-	startServer(handler)
+	startServer(handler)*/
 }
 
 func startServer(h *controller.Handler) {
@@ -44,11 +51,4 @@ func startServer(h *controller.Handler) {
 	if err != nil {
 		panic(any(err))
 	}
-}
-
-//приводим данные для бд к форматудля открытия соединения
-func formatDBSourceString() string {
-	return cfg.Database.Login +
-		":" + cfg.Database.Password +
-		"@tcp(" + cfg.Database.BindIp + ":" + cfg.Database.Port + ")/" + cfg.Database.Scheme
 }
